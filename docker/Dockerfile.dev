@@ -1,0 +1,16 @@
+FROM public.ecr.aws/docker/library/node:22
+WORKDIR /usr/src/app
+COPY package*.json ./
+RUN npm install
+# COPY . .
+# RUN npm run build
+
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV PROTOCOL=HTTP
+EXPOSE $PORT
+# CMD ["npm", "start"]
+
+CMD ["npm", "start", "--", "--host", "0.0.0.0"] 
+# Redundant, but allows for running without compose
+

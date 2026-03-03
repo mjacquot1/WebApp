@@ -173,9 +173,15 @@ module.exports = (env, argv) => ({
   ],
   devServer: {
     allowedHosts: ['wevotedeveloper.com', 'localhost'],
-    static: {
-      directory: path.join(__dirname, './build/index.html'),
-    },
+    static: [
+      { directory: path.join(__dirname, './build/index.html') },
+      ...(process.env.SERVE_STORYBOOK_STATIC
+        ? [{
+            directory: path.join(__dirname, 'storybook-static'),
+            publicPath: '/storybook-static',
+          }]
+        : []), // only serve storybook-static if the environment variable is set in dev
+    ],
     host: (useRealCerts ? 'wevotedeveloper.com' : 'localhost'),
     port,
     historyApiFallback: true,
@@ -197,7 +203,7 @@ module.exports = (env, argv) => ({
       },
     } : {}),
     client: {
-      overlay: {
+      overlay: process.env.DISABLE_WDS_OVERLAY ? false : {
         runtimeErrors: (error) => {
           if (error.message.includes('ResizeObserver loop')) {
             return false;

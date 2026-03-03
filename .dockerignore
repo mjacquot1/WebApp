@@ -1,0 +1,12 @@
+node_modules
+.git
+.gitignore
+build
+storybook-static
+**/*.log
+.env*
+.DS_Store
+*.md
+tests
+docs
+.cursor
