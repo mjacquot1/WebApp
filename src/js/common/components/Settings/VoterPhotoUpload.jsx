@@ -1,7 +1,7 @@
 import { AccountCircle } from '@mui/icons-material';
 import withStyles from '@mui/styles/withStyles';
 import { heicTo, isHeic } from 'heic-to';
-import { getPNGfromFile } from 'tiff-to-png-client';
+// import { getPNGfromFile } from 'tiff-to-png-client';
 import { DropzoneArea } from 'mui-file-dropzone';
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';

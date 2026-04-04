@@ -13,7 +13,22 @@ import DesignTokenColors from '../../common/components/Style/DesignTokenColors';
 import ActionPill from '../../components/ManageMyCandidates/ActionPill';
 import { CandidateActionsFilterMenu, CandidateTraitsFilterMenu, CandidateRowMenu } from '../../components/ManageMyCandidates/Menus';
 import { SendMessageButton, SendMessageButtonMobile } from '../../components/ManageMyCandidates/SendButtons';
-import { CardList, Card, CardTopRow, CardActionsAndOpinion, CardInfo, CardInfoTitle, CardInfoValue, VerticalBarWrapper, VerticalBar, ToolbarRow, LeftTools } from '../../components/Style/ManageMyCandidates';
+import {
+  CardList,
+  Card,
+  CardTopRow,
+  CardNameRow,
+  CardActionsAndOpinion,
+  CardInfo,
+  CardInfoTitle,
+  CardInfoValue,
+  VerticalBarWrapper,
+  VerticalBar,
+  ToolbarRow,
+  LeftTools,
+  CardNameText,
+  KebabBtn,
+} from '../../components/Style/ManageMyCandidates';
 
 const FILTERS = {
   ALL: 'all',
@@ -241,16 +256,16 @@ export default function SupportersInvited ({ supporters }) {
           return (
             <Card key={v.id} $selected={isChecked}>
               <CardTopRow>
-                <NameRow>
+                <CardNameRow>
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => toggleSelected(v.id)}
                     aria-label={`Select ${v.name}`}
                   />
-                  <NameText>{v.name}</NameText>
+                  <CardNameText>{v.name}</CardNameText>
 
-                </NameRow>
+                </CardNameRow>
 
                 <RightOptions>
                   <VerticalBarWrapper>
@@ -266,7 +281,7 @@ export default function SupportersInvited ({ supporters }) {
                 </RightOptions>
               </CardTopRow>
 
-              <CardActionsAndOpinion>
+              <CardActionsAndOpinion style={{ justifyContent: 'space-evenly' }}>
 
                 <CardInfo>
                   <CardInfoTitle>
@@ -422,29 +437,29 @@ const Container = styled.div`
   flex-direction: column;
 `;
 
-const NameRow = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-`;
+// const NameRow = styled.div`
+//   display: flex;
+//   gap: 10px;
+//   align-items: center;
+// `;
 
-const NameText = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-`;
+// const NameText = styled.div`
+//   font-size: 16px;
+//   font-weight: 700;
+// `;
 
-const KebabBtn = styled.button`
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 2px 6px;
-  border-radius: 10px;
+// const KebabBtn = styled.button`
+//   border: none;
+//   background: transparent;
+//   cursor: pointer;
+//   color: #6b7280;
+//   padding: 2px 6px;
+//   border-radius: 10px;
 
-  &:hover {
-    background: ${DesignTokenColors.neutralUI50};
-  }
-`;
+//   &:hover {
+//     background: ${DesignTokenColors.neutralUI50};
+//   }
+// `;
 
 const RightOptions = styled.div`
   margin-left: auto;

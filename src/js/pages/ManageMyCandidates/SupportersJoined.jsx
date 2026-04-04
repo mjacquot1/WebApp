@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import styled from "styled-components";
 import Alert from "@mui/material/Alert";
 import Button from "@mui/material/Button";
-import ButtonBase from "@mui/material/ButtonBase";
-import Checkbox from "@mui/material/Checkbox";
+// import ButtonBase from "@mui/material/ButtonBase";
+// import Checkbox from "@mui/material/Checkbox";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import DoneIcon from "@mui/icons-material/Done";
@@ -28,10 +28,33 @@ import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DesignTokenColors from "../../common/components/Style/DesignTokenColors";
 
+import { SendMessageButton, SendMessageButtonMobile } from '../../components/ManageMyCandidates/SendButtons';
+import ActionPill from '../../components/ManageMyCandidates/ActionPill';
+import { CandidateActionsFilterMenu, CandidateTraitsFilterMenu, CandidateRowMenu } from '../../components/ManageMyCandidates/Menus';
+import {
+  CardList,
+  Card,
+  CardTopRow,
+  CardActionsAndOpinion,
+  VerticalBarWrapper,
+  VerticalBar,
+  ToolbarRow,
+  LeftTools,
+  CandidateLink,
+  CardNameRow,
+  CardNameText,
+  CardBadges,
+  CardBadgeOk,
+  CardBadgeNeutral,
+  KebabBtn,
+  CardActions,
+} from '../../components/Style/ManageMyCandidates';
+
+
 const FILTERS = {
-  ALL: "all",
-  HAS_INVITED: "hasInvited",
-  HAS_ENDORSED: "hasEndorsed",
+  ALL: 'all',
+  HAS_INVITED: 'hasInvited',
+  HAS_ENDORSED: 'hasEndorsed',
 };
 
 const DEFAULT_THANK_YOU_MESSAGE = `Dear Candidate,
@@ -50,20 +73,17 @@ export default function SupportersJoined ({ supporters }) {
   const [editOpen, setEditOpen] = useState(false);
   const [copyOpen, setCopyOpen] = useState(false);
   const [isSending, setIsSending] = useState(false);
-  const [sendToast, setSendToast] = useState({ open: false, ok: true, msg: "" });
+  const [sendToast, setSendToast] = useState({ open: false, ok: true, msg: '' });
   const totalCount = supporters.length;
   const selectedCount = selected.size;
 
   // ----- checkbox dropdown menu state -----
   const [selectAnchorEl, setSelectAnchorEl] = useState(null);
-  const selectMenuOpen = Boolean(selectAnchorEl);
   // ----- "All" dropdown menu state -----
   const [filterAnchorEl, setFilterAnchorEl] = useState(null);
-  const filterMenuOpen = Boolean(filterAnchorEl);
   // ----- per-row "triple dot" menu state -----
   const [rowMenuAnchorEl, setRowMenuAnchorEl] = useState(null);
   const [rowMenuVoter, setRowMenuVoter] = useState(null);
-  const rowMenuOpen = Boolean(rowMenuAnchorEl);
   // ----- candidate drawer open state -----
   const [candidateDrawerOpen, setCandidateDrawerOpen] = useState(false);
   const [candidateDrawerVoter, setCandidateDrawerVoter] = useState(null);
@@ -169,7 +189,11 @@ export default function SupportersJoined ({ supporters }) {
   const toggleSelected = (id) => {
     setSelected((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
       return next;
     });
   };
@@ -177,19 +201,10 @@ export default function SupportersJoined ({ supporters }) {
   const toggleExpanded = (id) => {
     setExpanded((prev) => {
       const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
-  };
-
-  const selectAllVisible = () => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      const allSelected = visibleSupporters.every((r) => next.has(r.id));
-      if (allSelected) {
-        visibleSupporters.forEach((r) => next.delete(r.id));
+      if (next.has(id)) {
+        next.delete(id);
       } else {
-        visibleSupporters.forEach((r) => next.add(r.id));
+        next.add(id);
       }
       return next;
     });
@@ -205,42 +220,6 @@ export default function SupportersJoined ({ supporters }) {
       // clear all selection
       return new Set();
     });
-  };
-
-  const openSelectMenu = (e) => setSelectAnchorEl(e.currentTarget);
-  const closeSelectMenu = () => setSelectAnchorEl(null);
-
-  const selectIds = (ids) => {
-    setSelected(new Set(ids));
-    closeSelectMenu();
-  };
-
-  const handleAll = () => {
-    setSelected(new Set(supporters.map((v) => v.id)));
-    closeSelectMenu();
-  };
-
-  const handleNone = () => {
-    setSelected(new Set());
-    closeSelectMenu();
-  };
-
-  const openFilterMenu = (e) => setFilterAnchorEl(e.currentTarget);
-  const closeFilterMenu = () => setFilterAnchorEl(null);
-
-  const setFilterAll = () => {
-    setActiveFilter(FILTERS.ALL);
-    closeFilterMenu();
-  };
-
-  const setFilterHasInvited = () => {
-    setActiveFilter(FILTERS.HAS_INVITED);
-    closeFilterMenu();
-  };
-
-  const setFilterHasEndorsed = () => {
-    setActiveFilter(FILTERS.HAS_ENDORSED);
-    closeFilterMenu();
   };
 
   const openRowMenu = (e, voter) => {
@@ -262,12 +241,6 @@ export default function SupportersJoined ({ supporters }) {
   const closeCandidateDrawer = () => {
     setCandidateDrawerOpen(false);
     setCandidateDrawerVoter(null);
-  };
-
-  const handleEditVoter = () => {
-    if (!rowMenuVoter) return;
-    alert(`Edit voter: ${rowMenuVoter.name}`);
-    closeRowMenu();
   };
 
   const handleSendMessage = () => {
@@ -355,106 +328,35 @@ export default function SupportersJoined ({ supporters }) {
 
       <ToolbarRow>
         <LeftTools>
-          <SelectControl
-            aria-label="Selection options"
-            aria-controls={selectMenuOpen ? "select-by-action-menu" : undefined}
-            aria-haspopup="menu"
-            aria-expanded={selectMenuOpen ? "true" : undefined}
-          >
-            <Checkbox
-              checked={checked}
-              indeterminate={indeterminate}
-              tabIndex={-1}
-              disableRipple
-              sx={{ padding: 0 }}
-              onClick={handleSelectCheckboxClick}
-              onChange={() => {}}
-            />
-            <CaretButton
-              type="button"
-              onClick={openSelectMenu}
-              aria-label="Open selection menu"
-            >
-              <CaretIcon as={KeyboardArrowDownIcon} />
-            </CaretButton>
-          </SelectControl>
-
-          <Menu
-            id="select-by-action-menu"
-            anchorEl={selectAnchorEl}
-            open={selectMenuOpen}
-            onClose={closeSelectMenu}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            transformOrigin={{ vertical: "top", horizontal: "left" }}
-            PaperProps={{
-              style: {
-                borderRadius: 12,
-                overflow: "hidden",
-              },
-            }}
-          >
-            <MenuItem onClick={handleAll}>
-              <MenuItemText>All</MenuItemText>
-            </MenuItem>
-
-            {actionGroups.map((g) => (
-              <MenuItem key={g.label} onClick={() => selectIds(g.ids)}>
-                <MenuItemText>
-                  Ask to: {g.label} - ({g.count})
-                </MenuItemText>
-              </MenuItem>
-            ))}
-
-            <MenuItem onClick={handleNone}>
-              <MenuItemText>None</MenuItemText>
-            </MenuItem>
-          </Menu>
+          <CandidateActionsFilterMenu
+            selectAnchorEl={selectAnchorEl}
+            setSelectAnchorEl={setSelectAnchorEl}
+            checkedBoolean={checked}
+            indeterminateBoolean={indeterminate}
+            handleSelectCheckboxClick={handleSelectCheckboxClick}
+            menuOptions={[
+              { label: 'All', onClick: () => setSelected(new Set(supporters.map((v) => v.id))) },
+              ...actionGroups.map((g) => ({ label: `Ask to: ${g.label} - (${g.count})`, onClick: () => setSelected(new Set(g.ids)) })),
+              { label: 'None', onClick: () => setSelected(new Set()) },
+            ]}
+          />
 
           <VerticalBarWrapper $tight>
             <VerticalBar />
           </VerticalBarWrapper>
 
-          <AllButton
-            variant="text"
-            onClick={openFilterMenu}
-            aria-label="Filter options"
-            aria-controls={filterMenuOpen ? "all-filter-menu" : undefined}
-            aria-haspopup="menu"
-            aria-expanded={filterMenuOpen ? "true" : undefined}
-          >
-            {filterLabel}
-            <CaretIcon as={KeyboardArrowDownIcon} />
-          </AllButton>
-          <Menu
-            id="all-filter-menu"
-            anchorEl={filterAnchorEl}
-            open={filterMenuOpen}
-            onClose={closeFilterMenu}
-            anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-            transformOrigin={{ vertical: "top", horizontal: "left" }}
-            PaperProps={{
-              style: {
-                borderRadius: 12,
-                overflow: "hidden",
-              },
-            }}
-          >
-            <MenuItem onClick={setFilterAll}>
-              <MenuItemText>All</MenuItemText>
-            </MenuItem>
-
-            <MenuItem onClick={setFilterHasInvited}>
-              <MenuItemText>
-                Has invited friends - ({filterGroups.hasInvitedCount})
-              </MenuItemText>
-            </MenuItem>
-
-            <MenuItem onClick={setFilterHasEndorsed}>
-              <MenuItemText>
-                Has endorsed - ({filterGroups.hasEndorsedCount})
-              </MenuItemText>
-            </MenuItem>
-          </Menu>
+          <CandidateTraitsFilterMenu
+            filterAnchorEl={filterAnchorEl}
+            setFilterAnchorEl={setFilterAnchorEl}
+            filterLabel={filterLabel}
+            menuOptions={[
+              { label: 'All', onClick: () => setActiveFilter(FILTERS.ALL) },
+              { label: `Has invited friends- (${filterGroups.hasInvitedCount})`,
+                onClick: () => setActiveFilter(FILTERS.HAS_INVITED) },
+              { label: `Has endorsed - (${filterGroups.hasEndorsedCount})`,
+                onClick: () => setActiveFilter(FILTERS.HAS_ENDORSED) },
+            ]}
+          />
         </LeftTools>
         {/*
         <VerticalBarWrapper $tight className="u-show-mobile">
@@ -525,14 +427,11 @@ export default function SupportersJoined ({ supporters }) {
             <ListItemText primary="Copy" />
           </StyledMenuItem>
         </Menu>
-        <SendButton
-          variant="contained"
-          className="u-show-desktop-tablet"
-          disabled={selectedVoters.length === 0}
-          onClick={handleSendThankYou}
-        >
-          Send Message to Selected ({selectedVoters.length})
-        </SendButton>
+        <SendMessageButton
+          disbaleBoolean={selectedVoters.length === 0}
+          sendMessageFunction={handleSendThankYou}
+          buttonText={`Send Message to Selected (${selectedVoters.length})`}
+        />
       </ToolbarRow>
 
       <CardList>
@@ -547,38 +446,46 @@ export default function SupportersJoined ({ supporters }) {
           return (
             <Card key={v.id} $selected={isChecked}>
               <CardTopRow>
-                <NameRow>
+                <CardNameRow>
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => toggleSelected(v.id)}
                     aria-label={`Select ${v.name}`}
                   />
-                  <NameText>{v.name}</NameText>
+                  <CardNameText>{v.name}</CardNameText>
 
-                  <Badges>
+                  <CardBadges>
                     {v.endorsed && (
-                      <BadgeOk className="u-show-desktop-tablet">
-                        <DoneIcon sx={{ fontSize: 14 }} /> Endorsed
-                      </BadgeOk>
+                      <CardBadgeOk className="u-show-desktop-tablet">
+                        <DoneIcon sx={{ fontSize: 14 }} />
+                        {' '}
+                        Endorsed
+                      </CardBadgeOk>
                     )}
 
                     {!!v.friendsInvited && (
-                      <BadgeNeutral className="u-show-desktop-tablet">
-                        {v.friendsInvited} friends invited
-                      </BadgeNeutral>
+                      <CardBadgeNeutral className="u-show-desktop-tablet">
+                        {v.friendsInvited}
+                        {' '}
+                        friends invited
+                      </CardBadgeNeutral>
                     )}
 
                     <CandidateLink className="u-show-desktop-tablet" type="button" onClick={() => openCandidateDrawer(v)}>
                       View on candidate page
                     </CandidateLink>
-                  </Badges>
-                </NameRow>
+                  </CardBadges>
+                </CardNameRow>
 
                 <RightOptions>
-                  <BadgeNeutral className="u-show-mobile">
-                    Friends invited: <b>{v.friendsInvited}</b>
-                  </BadgeNeutral>
+                  <CardBadgeNeutral className="u-show-mobile">
+                    Friends invited:
+                    {' '}
+                    <b>
+                      {v.friendsInvited}
+                    </b>
+                  </CardBadgeNeutral>
                   <VerticalBarWrapper className="u-show-mobile">
                     <VerticalBar />
                   </VerticalBarWrapper>
@@ -611,36 +518,44 @@ export default function SupportersJoined ({ supporters }) {
                 <CardActions>
                   {v.endorsed && (
                     <ActionPill
-                      type="button"
+                      label={(
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, verticalAlign: 'middle' }}>
+                          <ThumbUpIcon sx={{ fontSize: 14}} />
+                          <span>
+                            Like endorsement/opinion for
+                            {' '}
+                            {v.name}
+                          </span>
+                        </span>
+                      )}
                       onClick={() => alert(`Like endorsement/opinion for ${v.name}`)}
-                    >
-                      <MediumBoldText>
-                        <ThumbUpIcon sx={{ fontSize: 14 }} /> Like endorsement/opinion
-                      </MediumBoldText>
-                    </ActionPill>
+                    />
                   )}
 
                   {hasMessageSent ? (
                     <ActionLink>
-                      <CheckCircleIcon color="success" sx={{ fontSize: 14 }} />{" "}
-                      Message sent ({v.messageSentCount})
+                      <CheckCircleIcon color="success" sx={{ fontSize: 14 }} />
+                      {' '}
+                      Message sent
+                      {' '}
+                      {v.messageSentCount}
                     </ActionLink>
-                  ) : needsAction ? (
-                    <ActionPill
-                      type="button"
-                      onClick={() => alert(`Send message & ask ${v.name} to ${actions}`)}
-                    >
-                      <MediumBoldText>Send message &amp; ask to:</MediumBoldText>
-                      <br />
-                      <em>{actions}</em>
-                    </ActionPill>
                   ) : (
                     <ActionPill
-                      type="button"
-                      onClick={() => alert(`Send thanks to ${v.name}`)}
-                    >
-                      <MediumBoldText>Send thanks</MediumBoldText>
-                    </ActionPill>
+                      label={
+                        needsAction ? 'Send message & ask to:' : 'Send thanks'
+                      }
+                      contentText={
+                        needsAction ? <em>{actions}</em> : null
+                      }
+                      onClick={
+                        needsAction ? () => alert(
+                          `Send message & ask ${v.name} to ${actions}`
+                        ) : () => alert(
+                          `Send thanks to ${v.name}`
+                        )
+                      }
+                    />
                   )}
                 </CardActions>
 
@@ -682,7 +597,9 @@ export default function SupportersJoined ({ supporters }) {
                       <MobileEndorsed>
                         {v.endorsed ? (
                           <>
-                            <ThumbUpIcon color="success" sx={{ fontSize: 16 }} /> Endorsed
+                            <ThumbUpIcon color="success" sx={{ fontSize: 16 }} />
+                            {' '}
+                            Endorsed
                           </>
                         ) : (
                           <>Not endorsed</>
@@ -702,45 +619,25 @@ export default function SupportersJoined ({ supporters }) {
         })}
       </CardList>
 
-      <MobileBottomBar className="u-show-mobile">
-        <MobileSendButton
-          variant="contained"
-          disabled={selectedVoters.length === 0}
-          onClick={handleSendThankYou}
-        >
-          Send Message to Selected ({selectedVoters.length})
-        </MobileSendButton>
-      </MobileBottomBar>
+      <SendMessageButtonMobile
+        disbaleBoolean={selectedVoters.length === 0}
+        sendThankYouFunction={handleSendThankYou}
+        buttonText={`Send Message to Selected (${selectedVoters.length})`}
+      />
 
-      <Menu
-        id="voter-row-menu"
-        anchorEl={rowMenuAnchorEl}
-        open={rowMenuOpen}
-        onClose={closeRowMenu}
-        anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
-        transformOrigin={{ vertical: "top", horizontal: "right" }}
-        PaperProps={{
-          style: {
-            borderRadius: 12,
-            overflow: "hidden",
-            minWidth: 220,
-          },
-        }}
-      >
-        <StyledMenuItem onClick={handleEditVoter}>
-          <ListItemIcon>
-            <EditOutlinedIcon sx={{ fontSize: 18 }} />
-          </ListItemIcon>
-          <ListItemText primary="Edit voter" />
-        </StyledMenuItem>
-
-        <StyledMenuItem onClick={handleSendMessage}>
-          <ListItemIcon>
-            <MailOutlineIcon sx={{ fontSize: 18 }} />
-          </ListItemIcon>
-          <ListItemText primary="Send message" />
-        </StyledMenuItem>
-      </Menu>
+      <CandidateRowMenu
+        rowMenuAnchorEl={rowMenuAnchorEl}
+        setRowMenuAnchorEl={setRowMenuAnchorEl}
+        setRowMenuVoter={setRowMenuVoter}
+        menuOptions={[
+          { icon: EditOutlinedIcon,
+            label: 'Edit voter',
+            onClick: () => rowMenuVoter && alert(`Edit voter: ${rowMenuVoter.name}`) },
+          { icon: MailOutlineIcon,
+            label: 'Send message',
+            onClick: () => rowMenuVoter && alert(`Send message to: ${rowMenuVoter.name}`) },
+        ]}
+      />
 
       {/* Drawer that opens with the candidate view of a voter, from "View on candidate page" link */}
       <Drawer
@@ -827,8 +724,8 @@ export default function SupportersJoined ({ supporters }) {
         open={copyOpen}
         autoHideDuration={2000}
         onClose={() => setCopyOpen(false)}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
-        sx={{ "&.MuiSnackbar-anchorOriginTopCenter": { top: 80 } }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        sx={{ '&.MuiSnackbar-anchorOriginTopCenter': { top: 80 } }}
       >
         <Alert severity="success" variant="filled">
           Copied!
@@ -838,12 +735,12 @@ export default function SupportersJoined ({ supporters }) {
         open={sendToast.open}
         autoHideDuration={2500}
         onClose={() => setSendToast((t) => ({ ...t, open: false }))}
-        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         sx={{
-          "&.MuiSnackbar-anchorOriginTopCenter": { top: 80 },
+          '&.MuiSnackbar-anchorOriginTopCenter': { top: 80 },
         }}
       >
-        <Alert severity={sendToast.ok ? "success" : "error"} variant="filled">
+        <Alert severity={sendToast.ok ? 'success' : 'error'} variant="filled">
           {sendToast.msg}
         </Alert>
       </Snackbar>
@@ -856,19 +753,6 @@ export default function SupportersJoined ({ supporters }) {
 const Container = styled.div`
   display: flex;
   flex-direction: column;
-`;
-
-const Placeholder = styled.div`
-  background: ${DesignTokenColors.neutralUI50};
-  border: 1px dashed ${DesignTokenColors.neutralUI300};
-  border-radius: 12px;
-  color: ${DesignTokenColors.neutralUI600};
-  padding: 24px;
-  text-align: center;
-`;
-
-const MediumBoldText = styled.span`
-  font-weight: 500;
 `;
 
 const MessageContainer = styled.div`
@@ -943,177 +827,12 @@ const ThankYouDropdownButton = styled.button`
   }
 `;
 
-const ToolbarRow = styled.div`
-  display: flex;
-  gap: 14px;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-  margin-left: 12px;
-`;
-
-const LeftTools = styled.div`
-  display: flex;
-  align-items: center;
-`;
-
-const SelectControl = styled(ButtonBase)`
-  display: inline-flex;
-  align-items: center;
-  gap: 2px;
-  padding: 2px 4px;
-  border-radius: 8px;
-`;
-
 const CaretIcon = styled.span`
   font-size: 32px;
   padding: 0 4px;
   color: #6b7280;
   display: inline-flex;
   align-items: center;
-`;
-
-const CaretButton = styled.button`
-  border: none;
-  background: transparent;
-  padding: 0;
-  margin: 0;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-`;
-
-const AllButton = styled(Button)`
-  && {
-    min-width: auto;
-    padding: 0 0 0 4px;
-    text-transform: none;
-    font-size: 14px;
-    color: #111827;
-  }
-
-  && .MuiButton-endIcon {
-    margin-left: 4px;
-    margin-right: 0;
-  }
-`;
-
-const MenuItemText = styled.span`
-  font-size: 14px;
-  color: #111827;
-`;
-
-const VerticalBarWrapper = styled.div`
-  align-self: stretch;
-  display: flex;
-  align-items: center;
-  margin: ${(p) => (p.$tight ? "0 4px" : "0 12px")};
-`;
-
-const VerticalBar = styled.div`
-  width: 1px;
-  height: 80%;
-  background: #d1d5db;
-  border-radius: 999px;
-`;
-
-const SendButton = styled(Button)`
-  && {
-    margin-left: 12px;
-    text-transform: none;
-    border-radius: 999px;
-  }
-`;
-
-const CardList = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  @media (max-width: 575px) {
-    padding-bottom: 72px;
-  }
-`;
-
-const Card = styled.div`
-  border: 1px solid #e5e7eb;
-  border-radius: 16px;
-  background: ${DesignTokenColors.neutralUI50};
-  padding: 12px;
-  box-shadow: 0 1px 0 rgba(0,0,0,0.02);
-`;
-
-const CardTopRow = styled.div`
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-`;
-
-const NameRow = styled.div`
-  display: flex;
-  gap: 10px;
-  align-items: center;
-`;
-
-const NameText = styled.div`
-  font-size: 16px;
-  font-weight: 700;
-`;
-
-const Badges = styled.div`
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-  font-size: 12px;
-`;
-
-const BadgeOk = styled.span`
-  background: #ecfdf5;
-  border: 1px solid #a7f3d0;
-  color: #065f46;
-  border-radius: 999px;
-  padding: 2px 8px;
-  font-weight: 700;
-
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-`;
-
-const BadgeNeutral = styled.span`
-  background: #f3f4f6;
-  border: 1px solid #e5e7eb;
-  color: #374151;
-  border-radius: 999px;
-  padding: 2px 8px;
-`;
-
-const CandidateLink = styled.button`
-  color: #2563eb;
-  text-decoration: none;
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-  font: inherit;
-
-  &:hover {
-    text-decoration: underline;
-  }
-`;
-
-const KebabBtn = styled.button`
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  color: #6b7280;
-  padding: 2px 6px;
-  border-radius: 10px;
-
-  &:hover {
-    background: ${DesignTokenColors.neutralUI50};
-  }
 `;
 
 const RightOptions = styled.div`
@@ -1127,41 +846,6 @@ const StyledMenuItem = styled(MenuItem)`
     font-size: 14px;
     padding-top: 10px;
     padding-bottom: 10px;
-  }
-`;
-
-const CardActionsAndOpinion = styled.div`
-  display: flex;
-`;
-
-const CardActions = styled.div`
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  @media (max-width: 575px) {
-    flex: 1;
-    align-items: stretch;
-  }
-`;
-
-const ActionPill = styled.button`
-  border: 1px solid #bfdbfe;
-  background: #eff6ff;
-  color: #1d4ed8;
-  border-radius: 999px;
-  padding: 8px 10px;
-  font-size: 12px;
-  cursor: pointer;
-  white-space: nowrap;
-
-  &:hover {
-    filter: brightness(0.98);
-  }
-  @media (max-width: 575px) {
-    flex: 1;
-  }
-  @media (min-width: 576px) {
-    min-width: 280px;
   }
 `;
 
@@ -1242,25 +926,4 @@ const MobileOpinionText = styled.div`
 const MobileOpinionEmpty = styled.div`
   font-size: 12px;
   color: #9ca3af;
-`;
-
-const MobileBottomBar = styled.div`
-  display: flex;
-  justify-content: center;
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  z-index: 1300; /* above most UI */
-  padding: 10px 12px;
-  padding-bottom: calc(72px + env(safe-area-inset-bottom));
-  background: ${DesignTokenColors.whiteUI};
-  border-top: 1px solid #e5e7eb;
-`;
-
-const MobileSendButton = styled(Button)`
-  && {
-    border-radius: 999px;
-    text-transform: none;
-  }
 `;

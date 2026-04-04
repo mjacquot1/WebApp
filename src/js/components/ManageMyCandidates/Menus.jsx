@@ -9,7 +9,8 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import styled from 'styled-components';
 
-export function CandidateActionsFilterMenu({ selectAnchorEl, setSelectAnchorEl, checkedBoolean, indeterminateBoolean, handleSelectCheckboxClick, menuOptions = null}) {
+
+export function CandidateActionsFilterMenu({ selectAnchorEl, setSelectAnchorEl, checkedBoolean, indeterminateBoolean, handleSelectCheckboxClick, selectLabel = '', menuOptions = null}) {
   const selectMenuOpen = Boolean(selectAnchorEl);
 
   const openSelectMenu = useCallback((e) => setSelectAnchorEl(e.currentTarget), [setSelectAnchorEl]);
@@ -37,7 +38,7 @@ export function CandidateActionsFilterMenu({ selectAnchorEl, setSelectAnchorEl, 
           onClick={handleSelectCheckboxClick}
           onChange={() => {}}
         />
-        <div>Select All</div>
+        <div>{selectLabel}</div>
         <CaretButton
           type="button"
           onClick={openSelectMenu}
@@ -156,6 +157,13 @@ export const CaretButton = styled.button`
   align-items: center;
 `;
 
+export const CaretIcon = styled.span`
+  font-size: 32px;
+  padding: 0 4px;
+  color: #6b7280;
+  display: inline-flex;
+  align-items: center;
+`;
 
 export const AllButton = styled(Button)`
   && {
@@ -172,13 +180,7 @@ export const AllButton = styled(Button)`
   }
 `;
 
-export const CaretIcon = styled.span`
-  font-size: 32px;
-  padding: 0 4px;
-  color: #6b7280;
-  display: inline-flex;
-  align-items: center;
-`;
+
 
 const CandidateSubMenu = styled(Menu).attrs({
   anchorOrigin: { vertical: 'bottom', horizontal: 'left' },

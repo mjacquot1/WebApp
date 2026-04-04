@@ -5,7 +5,7 @@ export default function ActionPill({ onClick, label, contentText = null}) {
   return (
     <ActionPillStyle type="button" onClick={onClick}>
       <MediumBoldText>{label}</MediumBoldText>
-      {contentText && <p>{contentText}</p>}
+      {contentText && <div>{contentText}</div>}
     </ActionPillStyle>
   );
 }
